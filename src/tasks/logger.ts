@@ -101,9 +101,26 @@ class Logger {
     appendFileSync(this.getLogFileName(), `${cleanMessage}\n`);
   }
 
+  
   /**
-   * Initializes the custom logger by overriding the console methods (log, info, warn, error)
-   * to include colorized output and file logging. Adds support for a 'task' log level.
+   * Initializes the custom logger by overriding the default console methods
+   * (log, info, warn, error, and debug) with custom implementations that
+   * format messages, log them to the console, and write them to a file.
+   *
+   * @remarks
+   * - This method should be called once at the start of the application to
+   *   ensure all console logs are captured and formatted consistently.
+   * - The original console methods are preserved and used internally.
+   *
+   * @example
+   * ```typescript
+   * Logger.initialize();
+   * console.log('This is a log message');
+   * console.info('This is an info message');
+   * console.warn('This is a warning message');
+   * console.error('This is an error message');
+   * console.debug('TASK', 'This is a task-specific debug message');
+   * ```
    */
   public static initialize(): void {
     this.ensureLogsDir();
