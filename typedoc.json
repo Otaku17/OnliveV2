@@ -2,7 +2,7 @@
   "entryPoints": ["src/**/*.ts"],
   "out": "docs",
   "tsconfig": "tsconfig.json",
-  "excludePrivate": true,
-  "excludeExternals": true,
+  "excludePrivate": false,
+  "excludeExternals": false,
   "excludeNotDocumented": false
 }
