@@ -4,5 +4,5 @@
   "tsconfig": "tsconfig.json",
   "excludePrivate": false,
   "excludeExternals": false,
-  "excludeNotDocumented": false
+  "excludeNotDocumented": true
 }

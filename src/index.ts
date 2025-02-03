@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import '@tasks/logger';
+//import '@tasks/logger';
 
 import { Server } from '@logic/server';
 import { database_connection } from '@tasks/database';

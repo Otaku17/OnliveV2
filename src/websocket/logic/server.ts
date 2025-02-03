@@ -6,6 +6,7 @@ import {
   EventResponse,
 } from '@src/types';
 import events from '@events/index';
+import { Player } from '@root/src/models/player';
 
 /**
  * The OServer class provides a WebSocket server implementation that allows
@@ -48,7 +49,7 @@ export class Server {
     this.wss = new WebSocketServer({ port });
     this.eventHandlers = events;
 
-    this.wss.on('connection', (ws, request) => {
+    this.wss.on('connection', async (ws, request) => {
       const playerId = request.headers['player-id'] as string;
 
       if (!playerId || this.clients.has(playerId)) {
@@ -72,8 +73,8 @@ export class Server {
           JSON.stringify({
             event: 'error',
             data: {
-              error: error.message,
-              message: error.code,
+              error: error.code,
+              message: error.message,
             },
           })
         );
@@ -84,13 +85,24 @@ export class Server {
       this.clients.set(playerId, ws);
       console.log(`Player ${playerId} connected`);
 
+      await Player.findOneAndUpdate(
+        { id: playerId },
+        { isConnect: true },
+        { new: false }
+      );
+
       ws.on('message', (message) => this.handleMessage(message, ws));
 
-      ws.on('close', () => {
+      ws.on('close', async () => {
         for (const [id, client] of this.clients.entries()) {
           if (client === ws) {
             this.clients.delete(id);
             console.log(`Player ${id} disconnected`);
+            await Player.findOneAndUpdate(
+              { id: playerId },
+              { isConnect: false },
+              { new: false }
+            );
             break;
           }
         }

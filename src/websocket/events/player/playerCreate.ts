@@ -3,9 +3,9 @@ import createEventHandler from '@logic/createEventHandler';
 import { Player } from '@models/player';
 
 const PlayerCreateData = z.object({
-  player_id: z.string(),
+  id: z.string(),
   name: z.string(),
-  is_girl: z.boolean(),
+  is_girl: z.boolean().optional(),
   charset_base: z.string().optional(),
 });
 
@@ -18,7 +18,7 @@ const PlayerCreateData = z.object({
  * @example
  * // Example data object
  * const data = {
- *   player_id: '12345',
+ *   id: '12345',
  *   name: 'John Doe',
  *   is_girl: false
  * };
@@ -51,9 +51,10 @@ const playerCreateHandler = createEventHandler('playerCreate', async (data) => {
 
   try {
     const _data = await Player.create({
-      id: validatedData.data.player_id,
+      id: validatedData.data.id,
       name: validatedData.data.name,
       isGirl: validatedData.data.is_girl,
+      isConnect: true,
     });
 
     return {

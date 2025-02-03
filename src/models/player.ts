@@ -7,7 +7,7 @@ function generateID() {
 interface IPlayer extends Document {
   id: string;
   name: string;
-  isGirl: boolean;
+  isGirl?: boolean;
   charsetBase?: string;
   greeting?: string;
   friendCode: string;
@@ -20,7 +20,7 @@ const SPlayer: Schema<IPlayer> = new Schema<IPlayer>(
   {
     id: { type: String, default: generateID, unique: true },
     name: { type: String, required: true },
-    isGirl: { type: Boolean, required: true },
+    isGirl: { type: Boolean, default: true },
     charsetBase: { type: String },
     greeting: { type: String },
     friendCode: { type: String, default: generateID, unique: true },
