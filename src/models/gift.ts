@@ -1,19 +1,115 @@
 import { Document, model, Schema } from 'mongoose';
 
-function generateId() {
-  const random = Math.random().toString(36).substring(2, 10);
-  return `gift-${random}`;
-}
 
+/**
+ * Represents an item with an identifier and a count.
+ *
+ * @interface IItem
+ * @property {string} id - The unique identifier for the item.
+ * @property {number} count - The count of the item.
+ */
 interface IItem {
   id: string;
   count: number;
 }
 
-interface ICreature {}
+/**
+ * Represents a creature with various attributes.
+ *
+ * @interface ICreature
+ * @property {string} id - The unique identifier for the creature.
+ * @property {string} level - The level of the creature.
+ * @property {boolean} [shiny] - Indicates if the creature is shiny.
+ * @property {number} [form] - The form of the creature.
+ * @property {number} [gender] - The gender of the creature.
+ * @property {number} [nature] - The nature of the creature.
+ * @property {number | string} [ability] - The ability of the creature.
+ * @property {number} [loyalty] - The loyalty level of the creature.
+ * @property {number[]} [stats] - The stats of the creature.
+ * @property {number[]} [bonus] - The bonus stats of the creature.
+ * @property {string[]} [moves] - The moves of the creature.
+ * @property {number | string} [item] - The item held by the creature.
+ * @property {string} [given_name] - The given name of the creature.
+ * @property {number | string} [captured_with] - The method used to capture the creature.
+ * @property {number} [captured_in] - The location where the creature was captured.
+ * @property {Date} [egg_at] - The date when the creature was obtained as an egg.
+ * @property {number} [egg_in] - The location where the creature was obtained as an egg.
+ * @property {string} [trainer_name] - The name of the trainer who owns the creature.
+ * @property {number} [trainer_id] - The ID of the trainer who owns the creature.
+ */
+interface ICreature {
+  id: string;
+  level: string;
+  shiny?: boolean;
+  form?: number;
+  gender?: number;
+  nature?: number;
+  ability?: number | string;
+  loyalty?: number;
+  stats?: number[];
+  bonus?: number[];
+  moves?: string[];
+  item?: number | string;
+  given_name?: string;
+  captured_with?: number | string;
+  captured_in?: number;
+  egg_at?: Date;
+  egg_in?: number;
+  trainer_name?: string;
+  trainer_id?: number;
+}
 
-interface IEgg {}
+/**
+ * Represents an egg with various attributes.
+ *
+ * @interface IEgg
+ *
+ * @property {string} id - The unique identifier for the egg.
+ * @property {string} level - The level of the egg.
+ * @property {boolean} [shiny] - Indicates if the egg is shiny (optional).
+ * @property {number} [form] - The form of the egg (optional).
+ * @property {number} [gender] - The gender of the egg (optional).
+ * @property {number} [nature] - The nature of the egg (optional).
+ * @property {number | string} [ability] - The ability of the egg, which can be a number or a string (optional).
+ * @property {number[]} [stats] - An array of stats for the egg (optional).
+ * @property {number[]} [bonus] - An array of bonus stats for the egg (optional).
+ * @property {string} [trainer_name] - The name of the trainer (optional).
+ * @property {number} [trainer_id] - The ID of the trainer (optional).
+ */
+interface IEgg {
+  id: string;
+  level: string;
+  shiny?: boolean;
+  form?: number;
+  gender?: number;
+  nature?: number;
+  ability?: number | string;
+  stats?: number[];
+  bonus?: number[];
+  trainer_name?: string;
+  trainer_id?: number;
+}
 
+/**
+ * Represents a gift in the system.
+ *
+ * @interface IGift
+ * @extends {Document}
+ *
+ * @property {string} id - The unique identifier for the gift.
+ * @property {string} title - The title of the gift.
+ * @property {IItem[]} [items] - Optional array of items included in the gift.
+ * @property {ICreature[]} [creatures] - Optional array of creatures included in the gift.
+ * @property {IEgg[]} [eggs] - Optional array of eggs included in the gift.
+ * @property {string[]} claimedBy - Array of player IDs who have claimed the gift.
+ * @property {string[]} allowedClaimers - Array of player IDs who are allowed to claim the gift.
+ * @property {'code' | 'internet'} type - The type of the gift, either 'code' or 'internet'.
+ * @property {string} [code] - Optional code associated with the gift, if the type is 'code'.
+ *
+ * @method canClaimed
+ * @param {string} playerId - The ID of the player attempting to claim the gift.
+ * @returns {{ canClaim: boolean; message?: string }} - An object indicating whether the player can claim the gift and an optional message.
+ */
 interface IGift extends Document {
   id: string;
   title: string;
@@ -21,32 +117,145 @@ interface IGift extends Document {
   creatures?: ICreature[];
   eggs?: IEgg[];
   claimedBy: string[];
+  allowedClaimers: string[];
   type: 'code' | 'internet';
-  code: string;
-  
+  code?: string;
+  canClaimed(playerId: string): { canClaim: boolean; message?: string };
 }
 
-const SGift = new Schema<IGift>(
-  {
-    id: { type: String, default: generateId, unique: true },
-    title: { type: String, required: true },
-    items: [
-      {
-        id: { type: String, required: true },
-        count: { type: Number, default: 1 },
-      },
-    ],
-    creatures: [{ type: Object }],
-    eggs: [{ type: Object }],
-    claimedBy: { type: [String], default: [] },
-    type: { type: String, required: true, enum: ['code', 'internet'] },
-    code: {
-      type: String,
-      required: function () { return this.type === 'code'; }
+/**
+ * Schema definition for the Gift model.
+ *
+ * @typedef {Object} IGift
+ * @property {string} id - Unique identifier for the gift, generated by default.
+ * @property {string} title - Title of the gift, required.
+ * @property {Array<Object>} items - List of items included in the gift.
+ * @property {string} items.id - Unique identifier for the item, required.
+ * @property {number} items.count - Count of the item, defaults to 1.
+ * @property {Array<Object>} creatures - List of creatures included in the gift.
+ * @property {string} creatures.id - Unique identifier for the creature, required.
+ * @property {number} creatures.level - Level of the creature, required.
+ * @property {boolean} [creatures.shiny] - Indicates if the creature is shiny.
+ * @property {number} [creatures.form] - Form of the creature.
+ * @property {number} [creatures.gender] - Gender of the creature.
+ * @property {number} [creatures.nature] - Nature of the creature.
+ * @property {Schema.Types.Mixed} [creatures.ability] - Ability of the creature.
+ * @property {number} [creatures.loyalty] - Loyalty of the creature.
+ * @property {Array<number>} [creatures.stats] - Stats of the creature.
+ * @property {Array<number>} [creatures.bonus] - Bonus stats of the creature.
+ * @property {Array<string>} [creatures.moves] - Moves of the creature.
+ * @property {Schema.Types.Mixed} [creatures.item] - Item held by the creature.
+ * @property {string} [creatures.given_name] - Given name of the creature.
+ * @property {Schema.Types.Mixed} [creatures.captured_with] - Method used to capture the creature.
+ * @property {number} [creatures.captured_in] - Location where the creature was captured.
+ * @property {string} [creatures.trainer_name] - Name of the trainer.
+ * @property {number} [creatures.trainer_id] - ID of the trainer.
+ * @property {Array<Object>} eggs - List of eggs included in the gift.
+ * @property {string} eggs.id - Unique identifier for the egg, required.
+ * @property {number} eggs.level - Level of the egg, defaults to 1.
+ * @property {boolean} [eggs.shiny] - Indicates if the egg is shiny.
+ * @property {number} [eggs.form] - Form of the egg.
+ * @property {number} [eggs.gender] - Gender of the egg.
+ * @property {number} [eggs.nature] - Nature of the egg.
+ * @property {Schema.Types.Mixed} [eggs.ability] - Ability of the egg.
+ * @property {Array<number>} [eggs.stats] - Stats of the egg.
+ * @property {Array<number>} [eggs.bonus] - Bonus stats of the egg.
+ * @property {string} [eggs.trainer_name] - Name of the trainer.
+ * @property {number} [eggs.trainer_id] - ID of the trainer.
+ * @property {Array<string>} claimedBy - List of users who have claimed the gift, defaults to an empty array.
+ * @property {Array<string>} allowedClaimers - List of users allowed to claim the gift, defaults to an empty array.
+ * @property {string} type - Type of the gift, required, can be either 'code' or 'internet'.
+ * @property {string} [code] - Code for the gift, required if the type is 'code'.
+ */
+const SGift = new Schema<IGift>({
+  id: {
+    type: String,
+    default: function () {
+      return `gift-${Math.random().toString(36).substring(2, 10)}`;
     },
+    unique: true,
+  },
+  title: { type: String, required: true },
+  items: [
+    {
+      id: { type: String, required: true },
+      count: { type: Number, default: 1 },
+    },
+  ],
+  creatures: [
+    {
+      id: { type: String, required: true },
+      level: { type: Number, required: true },
+      shiny: { type: Boolean },
+      form: { type: Number },
+      gender: { type: Number },
+      nature: { type: Number },
+      ability: { type: Schema.Types.Mixed },
+      loyalty: { type: Number },
+      stats: { type: [Number] },
+      bonus: { type: [Number] },
+      moves: { type: [String] },
+      item: { type: Schema.Types.Mixed },
+      given_name: { type: String },
+      captured_with: { type: Schema.Types.Mixed },
+      captured_in: { type: Number },
+      trainer_name: { type: String },
+      trainer_id: { type: Number },
+    },
+  ],
+  eggs: [
+    {
+      id: { type: String, required: true },
+      level: { type: Number, default: 1 },
+      shiny: { type: Boolean },
+      form: { type: Number },
+      gender: { type: Number },
+      nature: { type: Number },
+      ability: { type: Schema.Types.Mixed },
+      stats: { type: [Number] },
+      bonus: { type: [Number] },
+      trainer_name: { type: String },
+      trainer_id: { type: Number },
+    },
+  ],
+  claimedBy: { type: [String], default: [] },
+  allowedClaimers: { type: [String], default: [] },
+  type: { type: String, required: true, enum: ['code', 'internet'] },
+  code: {
+    type: String,
+    required: function () {
+      return this.type === 'code';
+    },
+  },
+});
 
+/**
+ * Determines if a player can claim the gift.
+ *
+ * @param {string} userId - The ID of the user.
+ * @returns {Object} An object containing a boolean indicating if the player can claim the gift and an optional message.
+ * @returns {boolean} return.canClaim - True if the player can claim the gift, false otherwise.
+ * @returns {string} [return.message] - An optional message explaining why the player cannot claim the gift.
+ */
+SGift.methods.canClaimed = function (userId: string): {
+  canClaim: boolean;
+  message?: string;
+} {
+  if (this.claimedBy.includes(userId)) {
+    return { canClaim: false, message: 'Gift already claimed.' };
   }
-);
+
+  if (
+    this.allowedClaimers.length > 0 &&
+    !this.allowedClaimers.includes(userId)
+  ) {
+    return {
+      canClaim: false,
+      message: 'You are not allowed to claim this gift.',
+    };
+  }
+  return { canClaim: true };
+};
 
 const Gift = model<IGift>('Gift', SGift);
 
