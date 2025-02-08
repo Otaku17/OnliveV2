@@ -85,11 +85,7 @@ export class Server {
       this.clients.set(playerId, ws);
       console.log(`Player ${playerId} connected`);
 
-      await Player.findOneAndUpdate(
-        { id: playerId },
-        { isConnect: true },
-        { new: false }
-      );
+      await Player.setPlayerConnectionStatus(playerId, true);
 
       ws.on('message', (message) => this.handleMessage(message, ws));
 
@@ -98,11 +94,7 @@ export class Server {
           if (client === ws) {
             this.clients.delete(id);
             console.log(`Player ${id} disconnected`);
-            await Player.findOneAndUpdate(
-              { id: playerId },
-              { isConnect: false },
-              { new: false }
-            );
+            await Player.setPlayerConnectionStatus(playerId, false);
             break;
           }
         }

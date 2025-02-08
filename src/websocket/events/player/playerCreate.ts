@@ -50,17 +50,14 @@ const playerCreateHandler = createEventHandler('playerCreate', async (data) => {
   }
 
   try {
-    const _data = await Player.create({
-      id: validatedData.data.id,
-      name: validatedData.data.name,
-      isGirl: validatedData.data.is_girl,
-      isConnect: true,
-    });
+    const action = await Player.ensurePlayer(validatedData.data);
+
+    if (!action.success) return { success: false, message: action.message };
 
     return {
       success: true,
-      message: `Player ${validatedData.data.name} created successfully`,
-      friend_code: _data.friendCode,
+      message: action.message,
+      friend_code: action.player?.friendCode,
     };
   } catch (error) {
     console.error('Error creating player:', error);
