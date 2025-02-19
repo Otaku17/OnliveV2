@@ -153,7 +153,7 @@ client.on_message do |message|
   log = "Received event: #{data['event']}, data: #{data['data']}"
   if data['event'] == 'ping'
     puts "Received ping, sending pong"
-    client.send_event('pong', {}) # Répondre avec un pong
+    client.send_event('pong', {}) 
   else
     puts "Received event: #{data['event']}, data: #{data['data']}"
   end
@@ -166,10 +166,70 @@ end
 # Exemple d'envoi et d'écoute
 client.listen
 
-client.send_event("connected", "134433894")
 client.send_event("greet", { name: "Ruby Client", boy: true })
 #client.send_event("playerCreate", { name: "RatyGirl", player_id: "134433894", is_girl: true })
 client.send_event("playerDelete", {  })
 
 # Maintenir la connexion ouverte
 sleep
+
+
+Online::WebSocketClient.connect("ws://localhost:8080", ["Player-ID: #{$trainer.id}"])
+Online::WebSocketClient.connect(headers: ["Player-ID: #{$trainer.id}"])
+Online::WebSocketClient.connect()
+Online::WebSocketClient.socket?
+Online::WebSocketClient.close
+
+
+Online::WebSocketClient.emit("playerCreate", { id: $trainer.id.to_s, name: $trainer.name, is_girl: $trainer.playing_girl })
+Online::WebSocketClient.emit("playerCreate", { id: $trainer.id.to_s, name: $trainer.name, is_girl: $trainer.playing_girl }) { |response| puts "Réponse reçue : #{response}" }
+
+
+Online::WebSocketClient.emit("playerDelete", {})
+Online::WebSocketClient.emit("playerDelete", {}) { |response| puts "Réponse reçue : #{response}" }
+
+Online::WebSocketClient.emit("giftList", {})
+Online::WebSocketClient.emit("giftList", {}) { |response| puts "Réponse reçue : #{response}" }
+
+Online::WebSocketClient.emit("giftClaim", {})
+Online::WebSocketClient.emit("giftClaim", { code: "Otaa" }) { |response| puts "Réponse reçue : #{response}" }
+
+Online::WebSocketClient.emit("gtsAdd", {})
+Online::WebSocketClient.emit("gtsAdd", { creature: $actors[0].instance_variables.to_h { |var| [var.to_s.delete('@').to_sym, $actors[0].instance_variable_get(var)] }, forbid_conditions: { db_symbol: 'mew', level: {min: 50}} }) { |response| puts "Réponse reçue : #{response}" }
+
+
+Online::WebSocketClient.emit("gtsTrade", {})
+Online::WebSocketClient.emit("gtsTrade", { 
+  playerA_id: player_a_id,
+  offeredCreature: { 
+    species: $actors[2].db_symbol, 
+    level: $actors[2].level, 
+    shiny: false, 
+    form: $actors[2].form, 
+    nature: $actors[2].nature[0], 
+    data: $actors[2].inspect 
+  }
+}) { |response| puts "Réponse reçue : #{response}" }
+
+Online::WebSocketClient.emit("gtsTrade", { playerA_id: player_a_id,offeredCreature: { species: $actors[2].db_symbol, level: $actors[2].level, shiny: false, form: $actors[2].form, nature: $actors[2].nature[0], data: $actors[2].inspect }}) { |response| puts "Réponse reçue : #{response}" }
+
+Online::PlayerManager.create_player
+
+Online::WebSocketClient.emit("gtsTrade", { playerA_id: $trainer.id.to_s, offeredCreature: { species: $actors[1].db_symbol, level: $actors[1].level, shiny: false, form: $actors[1].form, nature: $actors[1].nature[0], data: $actors[1].inspect }}) { |response| puts "Réponse reçue : #{response}" }
+
+Online::WebSocketClient.emit("gtsAllList", { 
+  player_id: $trainer.id.to_s, 
+  filters: { 
+    species: $actors[1].db_symbol, 
+    level: { min: 1, max: $actors[1].level }, 
+    shiny: false, 
+    form: $actors[1].form, 
+    nature: $actors[1].nature[0]
+  }
+}) { |response| puts "Réponse reçue : #{response}" }
+
+Online::WebSocketClient.emit("gtsAllList", { player_id: $trainer.id.to_s, filters: { species: 'pikachu' } }) { |response| puts "Réponse reçue : #{response}" }
+Online::WebSocketClient.emit("gtsAllList", { species: 'pikachu' }) { |response| puts "Réponse reçue : #{response}" }
+Online::WebSocketClient.emit("gtsAllList", { species: 'rayquaza' }) { |response| puts "Réponse reçue : #{response}" }
+
+//$game_system.map_interpreter.add_specific_pokemon

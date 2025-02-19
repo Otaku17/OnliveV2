@@ -6,6 +6,9 @@ import pingHandler from './ping';
 import pongHandler from './pong';
 import giftListHandler from './gift/giftList';
 import giftClaimHandler from './gift/giftClaim';
+import gtsAddHandler from './gts/gtsAdd';
+import gtsTradeHandler from './gts/gtsTrade';
+import gtsAllListHandler from './gts/gtsAllList';
 
 /**
  * An object containing event handlers for various websocket events.
@@ -20,6 +23,9 @@ const events: EventHandlers = {
   pong: pongHandler,
   giftList: giftListHandler,
   giftClaim: giftClaimHandler,
+  gtsAdd: gtsAddHandler,
+  gtsTrade: gtsTradeHandler,
+  gtsAllList: gtsAllListHandler,
 };
 
 export default events;

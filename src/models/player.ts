@@ -115,7 +115,7 @@ const SPlayer = new Schema<IPlayer>({
 SPlayer.statics.ensurePlayer = async function (
   playerData: Partial<IPlayer>
 ): Promise<{ success: boolean; player?: IPlayer; message?: string }> {
-  const existingPlayer = await this.findOne({ id: playerData.id });
+  const existingPlayer = await this.exists({ id: playerData.id });
 
   if (existingPlayer) {
     return { success: false, message: 'Player already exists' };
@@ -186,7 +186,7 @@ SPlayer.statics.clearExpiredPlayers = async function (
 
 /**
  * Represents the Player model.
- * 
+ *
  * @constant
  * @type {Model<IPlayer, IPlayerModel>}
  * @param {string} name - The name of the model.

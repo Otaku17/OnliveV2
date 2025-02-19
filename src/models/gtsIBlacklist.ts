@@ -6,7 +6,7 @@ import { Document, Model, model, Schema } from 'mongoose';
  * @interface IGTSBlacklist
  * @extends {Document}
  *
- * @property {string} species - The species of the Creature to be blacklisted.
+ * @property {string} id - The species of the Creature to be blacklisted.
  * @property {string} reason - The reason for blacklisting the Creature.
  * @property {Object} [forbid_conditions] - Optional conditions for the blacklist entry.
  * @property {Object} [forbid_conditions.level] - Optional level conditions for the Creature.
@@ -17,7 +17,7 @@ import { Document, Model, model, Schema } from 'mongoose';
  * @property {number} [forbid_conditions.nature] - The nature of the Creature.
  */
 interface IGtsBlacklist extends Document {
-  species: string;
+  id: string;
   reason: string;
   forbid_conditions?: {
     level?: { min?: number; max?: number };
@@ -55,13 +55,13 @@ interface IGtsBlacklistModel extends Model<IGtsBlacklist> {
    * }
    */
   isBlacklisted({
-    species,
+    id,
     level,
     shiny,
     form,
     nature,
   }: {
-    species: string;
+    id: string;
     level: number;
     shiny: boolean;
     form: number;
@@ -76,7 +76,7 @@ interface IGtsBlacklistModel extends Model<IGtsBlacklist> {
  * Each entry in the blacklist represents a species that is blacklisted along with the reason and specific conditions.
  *
  * @typedef {Object} IGTSBlacklist
- * @property {string} species - The species name that is blacklisted. This field is required and must be unique.
+ * @property {string} id - The species name that is blacklisted. This field is required and must be unique.
  * @property {string} reason - The reason why the species is blacklisted. This field is required.
  * @property {Object} forbid_conditions - The conditions under which the species is blacklisted.
  * @property {Object} forbid_conditions.level - The level conditions for the blacklist.
@@ -87,7 +87,7 @@ interface IGtsBlacklistModel extends Model<IGtsBlacklist> {
  * @property {number} [forbid_conditions.nature] - The nature identifier for the blacklist condition.
  */
 const SGtsBlacklist = new Schema<IGtsBlacklist>({
-  species: { type: String, required: true, unique: true },
+  id: { type: String, required: true, unique: true },
   reason: { type: String, required: true },
   forbid_conditions: {
     level: {
@@ -101,19 +101,19 @@ const SGtsBlacklist = new Schema<IGtsBlacklist>({
 });
 
 SGtsBlacklist.statics.isBlacklisted = async function ({
-  species,
+  id,
   level,
   shiny,
   form,
   nature,
 }: {
-  species: string;
+  id: string;
   level: number;
   shiny: boolean;
   form: number;
   nature: number;
 }): Promise<{ success: boolean; message?: string }> {
-  const blacklistEntry = await this.findOne({ species });
+  const blacklistEntry = await this.findOne({ id });
 
   if (!blacklistEntry) {
     return { success: true };

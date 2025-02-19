@@ -6,7 +6,10 @@ import {
   EventResponse,
 } from '@src/types';
 import events from '@events/index';
+import { verify } from 'jsonwebtoken';
 import { Player } from '@root/src/models/player';
+
+const SECRET_KEY = process.env.SECRET_KEY as string;
 
 /**
  * The OServer class provides a WebSocket server implementation that allows
@@ -50,6 +53,26 @@ export class Server {
     this.eventHandlers = events;
 
     this.wss.on('connection', async (ws, request) => {
+      const token = request.headers['authorization'] as string;
+
+      try {
+        verify(token, SECRET_KEY);
+
+        if (token !== process.env.TOKEN_SERVER) {
+          return this.rejectConnection(
+            ws,
+            'ERR_VALID_TOKEN',
+            'Access denied. The token is no longer valid.'
+          );
+        }
+      } catch (error) {
+        return this.rejectConnection(
+          ws,
+          'ERR_MISSING_TOKEN',
+          'Missing authentication token'
+        );
+      }
+
       const playerId = request.headers['player-id'] as string;
 
       if (!playerId || this.clients.has(playerId)) {
@@ -69,17 +92,7 @@ export class Server {
             !playerId ? 'ERR_MISSING_PLAYER_ID' : 'ERR_ALREADY_CONNECTED'
           ];
 
-        ws.send(
-          JSON.stringify({
-            event: 'error',
-            data: {
-              error: error.code,
-              message: error.message,
-            },
-          })
-        );
-        ws.close();
-        return;
+        return this.rejectConnection(ws, error.code, error.message);
       }
 
       this.clients.set(playerId, ws);
@@ -253,5 +266,10 @@ export class Server {
     } else {
       console.warn(`No handler for event: ${event}`);
     }
+  }
+
+  private rejectConnection(ws: WebSocket, code: string, message: string): void {
+    ws.send(JSON.stringify({ event: 'error', data: { error: code, message } }));
+    ws.close();
   }
 }
