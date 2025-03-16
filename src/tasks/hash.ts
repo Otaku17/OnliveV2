@@ -150,7 +150,7 @@ class Hash<T> {
    * @param callback - A function to execute for each key-value pair. It receives the value and key as arguments.
    */
   forEach(callback: (value: T, key: string) => void): void {
-    Object.entries(this.data).forEach(([key, value]) => callback(value, key));
+    for (const [key, value] of Object.entries(this.data)) callback(value, key);
   }
 
   /**

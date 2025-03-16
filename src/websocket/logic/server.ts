@@ -145,11 +145,11 @@ export class Server {
    * @param data - The data to send with the event.
    */
   public broadcast(event: string, data: EventResponse): void {
-    this.wss.clients.forEach((client) => {
+    for (const client of this.wss.clients) {
       if (client.readyState === WebSocket.OPEN) {
         client.send(JSON.stringify({ event, data }));
       }
-    });
+    }
   }
 
   /**
