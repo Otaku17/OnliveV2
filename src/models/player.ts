@@ -1,3 +1,4 @@
+import { set } from 'mongoose';
 import { Schema, Document, model, Model } from 'mongoose';
 
 /**
@@ -26,6 +27,7 @@ interface IPlayer extends Document {
   friends: string[];
   lastConnection: Date;
   isConnect: boolean;
+  isLinked: boolean;
 }
 
 /**
@@ -58,6 +60,15 @@ interface IPlayerModel extends Model<IPlayer> {
     playerId: string,
     isConnected: boolean
   ): Promise<IPlayer>;
+
+  /**
+   * Sets the linked status of a player.
+   *
+   * @param playerId - The unique identifier of the player.
+   * @param isLinked - A boolean indicating whether the player is linked (true) or not (false).
+   * @returns A promise that resolves to the updated player object.
+   */
+  setPlayerLinkedStatus(playerId: string, isLinked: boolean): Promise<IPlayer>;
 
   /**
    * Deletes multiple documents from the collection where the `lastConnection` field
@@ -182,6 +193,24 @@ SPlayer.statics.clearExpiredPlayers = async function (
     console.error('Error clearing expired players:', error);
     return 0;
   }
+};
+
+/**
+ * Updates the linked status of a player in the database.
+ *
+ * @param playerId - The unique identifier of the player.
+ * @param isLinked - A boolean indicating whether the player is linked or not.
+ * @returns A promise that resolves to the updated player object.
+ */
+SPlayer.statics.setPlayerLinkedStatus = async function (
+  playerId: string,
+  isLinked: boolean
+): Promise<IPlayer> {
+  return this.findOneAndUpdate(
+    { id: playerId },
+    { isLinked: isLinked },
+    { new: true }
+  );
 };
 
 /**
