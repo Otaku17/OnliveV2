@@ -3,19 +3,64 @@ import { server } from '@root/src';
 import { Gift } from '@root/src/models/gift';
 import { z } from 'zod';
 
+
 /**
- * Schema for validating gift claim data.
- *
- * This schema defines the structure of the gift claim data object,
- * which includes the following optional properties:
- *
- * - `id`: A string representing the unique identifier of the gift claim.
- * - `code`: A string representing the code associated with the gift claim.
+ * Schema for validating gift claim data using Zod.
+ * 
+ * This schema ensures that the input object contains either an `id` or a `code`,
+ * but not both. If neither is provided or both are provided, validation will fail
+ * with appropriate error messages.
+ * 
+ * @property id - An optional string representing the gift claim ID.
+ * @property code - An optional string representing the gift claim code.
+ * 
+ * Validation Rules:
+ * - At least one of `id` or `code` must be provided.
+ * - Both `id` and `code` cannot be provided simultaneously.
+ * 
+ * Example Usage:
+ * ```typescript
+ * const result = GiftClaimData.safeParse({ id: "123" });
+ * if (!result.success) {
+ *   console.error(result.error.errors);
+ * }
+ * ```
  */
-const GiftClaimData = z.object({
-  id: z.string().optional(),
-  code: z.string().optional(),
-});
+const GiftClaimData = z
+  .object({
+    id: z.string().optional(),
+    code: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    const hasId = !!data.id;
+    const hasCode = !!data.code;
+
+    if (!hasId && !hasCode) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'You must provide either "id" or "code".',
+        path: ['id'],
+      });
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'You must provide either "id" or "code".',
+        path: ['code'],
+      });
+    }
+
+    if (hasId && hasCode) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'You can only provide "id" or "code", not both.',
+        path: ['id'],
+      });
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'You can only provide "id" or "code", not both.',
+        path: ['code'],
+      });
+    }
+  });
 
 /**
  * Handles the 'giftClaim' event.
@@ -37,7 +82,16 @@ const giftClaimHandler = createEventHandler('giftClaim', async (data, ws) => {
   const validatedData = GiftClaimData.safeParse(data);
 
   if (!validatedData.success) {
-    return { success: false, message: 'Invalid gift claimed data' };
+    const zodErrors = validatedData.error.errors.map((err) => ({
+      path: err.path.join('.'),
+      message: err.message,
+    }));
+
+    return {
+      success: false,
+      message: 'Invalid gift claimed data',
+      errors: zodErrors,
+    };
   }
 
   const player = server.getClientId(ws);

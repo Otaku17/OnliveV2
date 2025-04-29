@@ -52,7 +52,6 @@ const GtsAddData = z.object({
  * - Catches and logs any errors that occur during the process.
  */
 const gtsAddHandler = createEventHandler('gtsAdd', async (data, ws) => {
-  console.log(data);
 
   const validatedData = GtsAddData.safeParse(data);
 

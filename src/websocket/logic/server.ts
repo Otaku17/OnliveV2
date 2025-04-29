@@ -114,7 +114,7 @@ export class Server {
       });
     });
 
-    console.log(`WebSocket server started on ws://localhost:${port}`);
+    console.info(`WebSocket server started on ws://localhost:${port}`);
   }
 
   /**
@@ -215,6 +215,13 @@ export class Server {
     return Array.from(this.clients.values());
   }
 
+  /**
+   * Associates a WebSocket connection with a specific player ID.
+   *
+   * @param playerId - The unique identifier of the player.
+   * @param ws - The WebSocket instance to be associated with the player.
+   * @returns void
+   */
   public setClientsWebsocket(playerId: string, ws: WebSocket): void {
     this.clients.set(playerId, ws);
   }

@@ -16,7 +16,12 @@ async function main() {
   await database_connection();
   server = new Server(PORT);
 
-  await Player.clearExpiredPlayers(30);
+  await Player.clearExpiredPlayers(
+    process.env.DAYS_PLAYER_INACTIVE as unknown as number
+  );
+  await Player.clearOldFriendRequests(
+    process.env.DAYS_FRIEND_INACTIVE_REQUEST as unknown as number
+  );
   await Gift.clearExpiredGifts();
 }
 

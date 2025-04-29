@@ -12,23 +12,16 @@ import { server } from '@src/index';
 const playerDeleteHandler = createEventHandler(
   'playerDelete',
   async (_, ws) => {
-    const player = server.getClientId(ws);
+    const playerId = server.getClientId(ws);
 
-    if (!player) {
+    if (!playerId) {
       return { success: false, message: 'Player not found' };
     }
 
     try {
-      const result = await Player.deleteOne({ id: player });
+      const { success, message } = await Player.removePlayer(playerId);
 
-      if (result.deletedCount === 0) {
-        return {
-          success: true,
-          message: 'Player deletion interrupted, no player found',
-        };
-      }
-
-      return { success: true, message: 'Player deleted successfully' };
+      return { success, message };
     } catch (error) {
       console.error('Error deleting player:', error);
       return { success: false, message: 'Failed to delete player' };

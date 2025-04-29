@@ -4,7 +4,7 @@
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
-    "test": "ts-node -r tsconfig-paths/register src/index.ts",
+    "start": "ts-node -r tsconfig-paths/register src/index.ts",
     "doc": "npx typedoc --out docs \"src/**/*.ts\""
   },
   "keywords": [],
@@ -28,6 +28,6 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.9.6",
     "ws": "^8.18.0",
-    "zod": "^3.24.1"
+    "zod": "^3.24.3"
   }
 }

@@ -22,7 +22,17 @@ import { connect, connection } from 'mongoose';
  */
 const database_connection = async () => {
   const { DB_NAME, DB_HOST, DB_PORT, DB_USER, DB_PSWD } = process.env;
+
+  if (!DB_NAME || !DB_HOST || !DB_PORT) {
+    throw new Error('Missing one or more required DB environment variables');
+  }
+
   const uri = `mongodb://${DB_HOST}:${DB_PORT}`;
+
+  if (connection.readyState === 1) {
+    console.info('Already connected to the database');
+    return;
+  }
 
   try {
     await connect(uri, {
@@ -31,11 +41,18 @@ const database_connection = async () => {
         username: DB_USER,
         password: DB_PSWD,
       },
+      retryWrites: true,
+      w: 'majority',
+      connectTimeoutMS: 10000,
     });
-    console.info(`Connected to the database ${DB_NAME}`);
+    console.info(`Connected to the database "${DB_NAME}"`);
   } catch (error) {
     console.error('Failed to connect to the database:', error);
   }
+
+  connection.on('error', (err) =>
+    console.error('Mongoose connection error:', err)
+  );
 };
 
 /**
