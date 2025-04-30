@@ -9,9 +9,7 @@ import createEventHandler from '@logic/createEventHandler';
  * This schema ensures that the `fields` property is a record where the keys are strings
  * and the values can be of any type (`unknown`).
  */
-const PlayerUpdateData = z.object({
-  fields: z.record(z.string(), z.unknown()),
-});
+const PlayerUpdateData = z.record(z.string(), z.unknown());
 
 /**
  * Handles the "playerUpdate" WebSocket event.
@@ -27,6 +25,7 @@ const playerUpdateHandler = createEventHandler(
   'playerUpdate',
   async (data, ws) => {
     const validatedData = PlayerUpdateData.safeParse(data);
+
     if (!validatedData.success) {
       return { success: false, message: 'Invalid player update data' };
     }
@@ -38,10 +37,7 @@ const playerUpdateHandler = createEventHandler(
     }
 
     try {
-      const result = await Player.updateFields(
-        player,
-        validatedData.data.fields
-      );
+      const result = await Player.updateFields(player, validatedData.data);
       return {
         success: true,
         message: 'Player updated successfully',

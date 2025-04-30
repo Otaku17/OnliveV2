@@ -34,8 +34,8 @@ interface IPlayer extends Document {
   id: string;
   name: string;
   isGirl?: boolean;
-  charsetBase?: string;
-  greeting?: string;
+  charsetBase: string;
+  greeting: string;
   friendCode: string;
   friends: string[];
   friendRequests: FriendRequest[];
@@ -219,7 +219,7 @@ const SPlayer = new Schema<IPlayer>({
   },
   name: { type: String, required: true },
   isGirl: { type: Boolean },
-  charsetBase: { type: String },
+  charsetBase: { type: String, default: '' },
   greeting: { type: String, default: '' },
   friendCode: {
     type: String,
@@ -243,6 +243,7 @@ const SPlayer = new Schema<IPlayer>({
   },
   lastConnection: { type: Date, default: Date.now },
   isConnect: { type: Boolean, default: false },
+  isLinked: { type: Boolean, default: false },
 });
 
 SPlayer.statics.ensurePlayer = async function (

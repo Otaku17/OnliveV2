@@ -183,6 +183,7 @@ Online::WebSocketClient.close
 
 Online::WebSocketClient.emit("playerCreate", { id: $trainer.id.to_s, name: $trainer.name, is_girl: $trainer.playing_girl })
 Online::WebSocketClient.emit("playerCreate", { id: $trainer.id.to_s, name: $trainer.name, is_girl: $trainer.playing_girl }) { |response| puts "Réponse reçue : #{response}" }
+Online::WebSocketClient.emit("playerUpdate", { name: "Ota", isGirl: false } ) { |response| puts "Réponse reçue : #{response}" }
 
 
 Online::WebSocketClient.emit("playerDelete", {})
@@ -232,4 +233,11 @@ Online::WebSocketClient.emit("gtsAllList", { player_id: $trainer.id.to_s, filter
 Online::WebSocketClient.emit("gtsAllList", { species: 'pikachu' }) { |response| puts "Réponse reçue : #{response}" }
 Online::WebSocketClient.emit("gtsAllList", { species: 'rayquaza' }) { |response| puts "Réponse reçue : #{response}" }
 
-//$game_system.map_interpreter.add_specific_pokemon
+
+Online::WebSocketClient.emit("friendRequest", { toFriendCode: "jxh86x4z" }) { |response| puts "Réponse reçue : #{response}" }
+Online::WebSocketClient.emit("friendAccept", { senderId: "1064788393" }) { |response| puts "Réponse reçue : #{response}" }
+Online::WebSocketClient.emit("friendDecline", { senderId: "1064788393" }) { |response| puts "Réponse reçue : #{response}" }
+Online::WebSocketClient.emit("friendRemove", { friendId: "1064788393" }) { |response| puts "Réponse reçue : #{response}" }
+Online::WebSocketClient.emit("friendPending", {}) { |response| puts "Réponse reçue : #{response}" }
+Online::WebSocketClient.emit("friendList", {}) { |response| puts "Réponse reçue : #{response}" }
+#$game_system.map_interpreter.add_specific_pokemon
