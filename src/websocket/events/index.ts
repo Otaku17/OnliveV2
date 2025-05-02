@@ -2,8 +2,6 @@ import { EventHandlers } from '@src/types';
 import errorHandler from './error';
 import playerCreateHandler from './player/playerCreate';
 import playerDeleteHandler from './player/playerDelete';
-import pingHandler from './ping';
-import pongHandler from './pong';
 import giftListHandler from './gift/giftList';
 import gtsAddHandler from './gts/gtsAdd';
 import gtsTradeHandler from './gts/gtsTrade';
@@ -28,8 +26,7 @@ const events: EventHandlers = {
   playerCreate: playerCreateHandler,
   playerDelete: playerDeleteHandler,
   playerUpdate: playerUpdateHandler,
-  ping: pingHandler,
-  pong: pongHandler,
+
   giftList: giftListHandler,
   giftClaimByCode: giftClaimByCodeHandler,
   giftClaimById: giftClaimByIdHandler,

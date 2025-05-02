@@ -4,12 +4,16 @@ import {
   EventHandlers,
   EventData,
   EventResponse,
+  LatencyData,
 } from '@src/types';
 import events from '@events/index';
 import { verify } from 'jsonwebtoken';
 import { Player } from '@root/src/models/player';
+import { Server as HttpNodeServer } from 'http';
 
 const SECRET_KEY = process.env.SECRET_KEY as string;
+
+const PING_LATENCY = 10000; // 10 seconds
 
 /**
  * The OServer class provides a WebSocket server implementation that allows
@@ -38,6 +42,7 @@ export class Server {
   private wss: WebSocketServer;
   private eventHandlers: EventHandlers;
   private clients: Map<string, WebSocket> = new Map();
+  private latencies: Map<string, LatencyData> = new Map();
 
   /**
    * Creates an instance of the WebSocket server and sets up event listeners for client connections.
@@ -48,8 +53,8 @@ export class Server {
    *
    * Additionally, it logs a message indicating that the WebSocket server has started and is listening on the specified port.
    */
-  constructor(port: number) {
-    this.wss = new WebSocketServer({ port });
+  constructor(httpServer: HttpNodeServer) {
+    this.wss = new WebSocketServer({ server: httpServer });
     this.eventHandlers = events;
 
     this.wss.on('connection', async (ws, request) => {
@@ -113,8 +118,6 @@ export class Server {
         }
       });
     });
-
-    console.info(`WebSocket server started on ws://localhost:${port}`);
   }
 
   /**
@@ -246,27 +249,45 @@ export class Server {
   }
 
   /**
-   * Handles incoming events by invoking the corresponding event handler.
+   * Handles incoming events from a WebSocket connection.
    *
    * @param event - The name of the event to handle.
    * @param data - The data associated with the event.
-   * @param ws - The WebSocket connection through which the event was received.
-   * @returns A promise that resolves when the event has been handled.
+   * @param ws - The WebSocket instance associated with the client.
+   * @returns A promise that resolves when the event handling is complete.
    *
-   * @throws Will log an error if the event handler throws an error.
    * @remarks
-   * If no handler is found for the given event, a warning will be logged.
+   * This method identifies the player associated with the WebSocket connection
+   * and invokes the corresponding event handler if one exists. It also measures
+   * and logs the latency for the event handling process. If no handler is found
+   * for the event, a warning is logged. Errors during event handling are caught
+   * and logged.
+   *
+   * @throws Will log an error if the event handler throws an exception.
    */
   private async handleEvent(
     event: string,
     data: EventData,
     ws: WebSocket
   ): Promise<void> {
+    const playerId = this.getClientId(ws);
+    if (!playerId) {
+      console.warn('Player ID not found for the WebSocket connection');
+      return;
+    }
+
+    const start = Date.now();
+
     const handler = this.eventHandlers[event];
 
     if (handler) {
       try {
         await handler(data, ws);
+        const latency = Date.now() - start;
+        this.latencies.set(playerId, {
+          lastPing: Date.now(),
+          latency,
+        });
       } catch (error) {
         console.error(`Error handling event ${event}:`, error);
       }
@@ -275,8 +296,30 @@ export class Server {
     }
   }
 
+  /**
+   * Rejects a WebSocket connection by sending an error message and closing the connection.
+   *
+   * @param ws - The WebSocket instance representing the connection to be rejected.
+   * @param code - A string representing the error code to be sent to the client.
+   * @param message - A string containing the error message to be sent to the client.
+   */
   private rejectConnection(ws: WebSocket, code: string, message: string): void {
     ws.send(JSON.stringify({ event: 'error', data: { error: code, message } }));
     ws.close();
+  }
+
+  /**
+   * Calculates the global average latency based on the stored latency values.
+   *
+   * @returns {number | null} The average latency if there are valid latency values,
+   *                          or `null` if no valid latencies are available.
+   */
+  public getGlobalLatency(): number | null {
+    const latencies = Array.from(this.latencies.values())
+      .map((data) => data.latency)
+      .filter((latency) => latency > 0);
+    if (latencies.length === 0) return null;
+    const totalLatency = latencies.reduce((acc, latency) => acc + latency, 0);
+    return totalLatency / latencies.length;
   }
 }

@@ -5,7 +5,8 @@
   "type": "commonjs",
   "scripts": {
     "start": "ts-node -r tsconfig-paths/register src/index.ts",
-    "doc": "npx typedoc --out docs \"src/**/*.ts\""
+    "install:doc": "npm install --save-dev typedoc jsdoc tsdoc",
+    "generate:doc": "npx typedoc --out docs \"src/**/*.ts\""
   },
   "keywords": [],
   "author": "Ota",
@@ -17,11 +18,8 @@
     "@types/node": "^22.10.7",
     "@types/ws": "^8.5.13",
     "dotenv": "^16.4.7",
-    "jsdoc": "^4.0.4",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
-    "tsdoc": "^0.0.4",
-    "typedoc": "0.28.0",
     "typescript": "^5.7.3"
   },
   "dependencies": {

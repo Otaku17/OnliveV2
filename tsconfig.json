@@ -21,6 +21,7 @@
       "@types/*": ["src/types/*"],
       "@logic/*": ["src/websocket/logic/*"],
       "@tasks/*": ["src/tasks/*"],
+      "@http/*": ["src/http/*"],
     }
   },
   "include": ["src", "src/**/*.ts", "src/index.ts"],
