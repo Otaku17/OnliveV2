@@ -11,7 +11,7 @@ import http from 'http';
 import { database_connection, database_close } from '@tasks/database'; // 👈 Ajoute database_disconnect
 import routes from '@http/routes';
 
-const PORT = 8080;
+const PORT = Number(process.env.SERVER_PORT) || 8080;
 
 const rawHttpServer = http.createServer();
 
